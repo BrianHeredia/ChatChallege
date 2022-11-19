@@ -1,0 +1,55 @@
+﻿@page "/chats"
+@attribute [Authorize]
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<button class="btn btn-primary" @onclick="CreateMyChatUser">Create my ChatUser</button>
+<h1>Users</h1>
+@if(users != null && users.Count > 0)
+{
+    foreach(var user in users)
+    {
+        <p>@user.Username</p>
+    }
+}
+
+<PageTitle>Chats</PageTitle>
+
+<h1>Chats</h1>
+
+<p role="status">Current chat: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+
+
+@code {
+    private int currentCount = 0;
+    private List<ChatUser> users { get; set; }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private void CreateMyChatUser()
+    {
+        using var db = DbFactory.CreateDbContext();
+
+        db.ChatUsers.Add(new ChatUser()
+        {
+            ChatUserId = Guid.NewGuid(),
+            Username = "brianheredia@gmail.com"
+        });
+
+        db.SaveChanges();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+
+        users = await db.ChatUsers.ToListAsync();
+
+        await base.OnParametersSetAsync();
+    }
+}
