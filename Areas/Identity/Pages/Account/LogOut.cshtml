@@ -1,7 +1,8 @@
 ﻿@page
 @using Microsoft.AspNetCore.Identity
+@using ChatChallenge.Data
 @attribute [IgnoreAntiforgeryToken]
-@inject SignInManager<IdentityUser> SignInManager
+@inject SignInManager<ChatUser> SignInManager
 @functions {
     public async Task<IActionResult> OnPost()
     {

@@ -6,17 +6,20 @@ namespace ChatChallenge.Repositories
     public class ChatRepository : IChatRepository
     {
         private readonly DbContextOptions<ApplicationDbContext> options;
-        public ChatRepository(DbContextOptions<ApplicationDbContext> options)
+        public ChatRepository(DbContextOptions<ApplicationDbContext> _options)
         {
-            options = options ?? throw new ArgumentNullException(nameof(options));
+            options = _options ?? throw new ArgumentNullException(nameof(options));
         }
 
         public void CreateChat(Chat chat)
         {
             using (var context = new ApplicationDbContext(options))
             {
-                context.Chats.Add(chat);
-
+                context.Entry<Chat>(chat).State = EntityState.Added;
+                foreach (var user in chat.JoinedChatUsers)
+                {
+                    context.Entry<ChatUser>(user).State = EntityState.Modified;
+                }
                 context.SaveChanges();
             }
         }
@@ -31,21 +34,19 @@ namespace ChatChallenge.Repositories
             }
         }
 
-        public void CreateUser(ChatUser user)
+        public List<ChatUser> GetAllUsers()
         {
             using (var context = new ApplicationDbContext(options))
             {
-                context.ChatUsers.Add(user);
-
-                context.SaveChanges();
+                return context.Users.ToList();
             }
         }
 
-        public List<ChatUser> GetAllUser(Guid id)
+        public Chat GetChat(Guid id)
         {
             using (var context = new ApplicationDbContext(options))
             {
-                return context.ChatUsers.ToList();
+                return context.Chats.Include(x => x.ChatMessages).Include(x => x.JoinedChatUsers).First(x => x.ChatId == id);
             }
         }
 
@@ -70,16 +71,29 @@ namespace ChatChallenge.Repositories
             }
         }
 
-        public List<Chat> GetUserChats(Guid id)
+        public List<Chat> GetUserChats(string id)
         {
-            using(var context = new ApplicationDbContext(options))
+            using (var context = new ApplicationDbContext(options))
             {
-                var user = context.ChatUsers.Include(x => x.JoinedChatsRooms).Where(x => x.ChatUserId == id).FirstOrDefault();
-                if(user != null)
-                {
-                    return user.JoinedChatsRooms.ToList();
-                }
-                return new List<Chat>();
+                return context.Chats.Include(x => x.JoinedChatUsers).Where(x => x.JoinedChatUsers.Any(y => y.Id == id)).ToList();
+            }
+        }
+
+        public ChatUser GetUser(string id)
+        {
+            using (var context = new ApplicationDbContext(options))
+            {
+                return context.ChatUsers.First(x => x.Id == id);
+            }
+        }
+
+        public void UpdateChat(Chat chat)
+        {
+            using (var context = new ApplicationDbContext(options))
+            {
+                context.Entry<Chat>(chat).State = EntityState.Modified;
+
+                context.SaveChanges();
             }
         }
     }

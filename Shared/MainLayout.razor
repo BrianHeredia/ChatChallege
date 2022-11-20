@@ -1,20 +1,30 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider _authentication
 
 <PageTitle>ChatChallenge</PageTitle>
-
-<div class="page">
-    <div class="sidebar">
+<CascadingValue Value="UserId">
+    <div class="page">
+        <div class="sidebar">
         <NavMenu />
+        </div>    
+        <main>
+            <div class="top-row px-4 auth">
+                <LoginDisplay />
+                <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
     </div>
+</CascadingValue>
 
-    <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+@code{
+    public string? UserId { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+        UserId = _authentication.GetAuthenticationStateAsync().Result.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value.ToString();
+        await base.OnParametersSetAsync();
+    }
+}

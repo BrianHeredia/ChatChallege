@@ -1,5 +1,35 @@
-﻿<h3>Users</h3>
+﻿@page "/users"
+@attribute [Authorize]
+@inject IChatService _chatService
+
+<PageTitle>Users</PageTitle>
+
+<h1>Users</h1>
+@if(_Users != null && _Users.Count > 0)
+{
+    foreach(var user in _Users)
+    {
+        <p>@user.Email</p>
+        <button  class="btn btn-outline-primary" onclick="@(()=>StartNewChat(user.Id))">Start New Chat</button>
+        <br/>
+    }
+}
 
 @code {
+    [CascadingParameter]
+    public string? UserId { get; set; }
+    private List<ChatUser>? _Users { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+        _Users = _chatService.GetAllUsers().Where(x=>x.Id != UserId).ToList();
 
+        await base.OnParametersSetAsync();
+    }
+    private void StartNewChat(string userId)
+    {
+        if(UserId != null)
+        {
+            var response = _chatService.StartChat(UserId, userId);            
+        }
+    }
 }

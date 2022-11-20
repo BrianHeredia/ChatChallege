@@ -1,55 +1,38 @@
 ﻿@page "/chats"
 @attribute [Authorize]
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject IChatService _chatService
+@inject NavigationManager NavigationManager
 
-<button class="btn btn-primary" @onclick="CreateMyChatUser">Create my ChatUser</button>
-<h1>Users</h1>
-@if(users != null && users.Count > 0)
+<PageTitle>Chats</PageTitle>
+<h1>Chats</h1>
+@if(_Chats != null && _Chats.Count > 0)
 {
-    foreach(var user in users)
+    foreach(var chat in _Chats)
     {
-        <p>@user.Username</p>
+        var members = "Chat: ";
+        foreach (var user in chat.JoinedChatUsers)
+        {
+            members = members + user.UserName + "; ";
+        }
+        <p>@members</p>
+        <button class="btn btn-outline-primary" onclick="@(()=>GoToChat(chat.ChatId))">Go to Chat</button>
+        <br/>
     }
 }
 
-<PageTitle>Chats</PageTitle>
-
-<h1>Chats</h1>
-
-<p role="status">Current chat: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-
-
 @code {
-    private int currentCount = 0;
-    private List<ChatUser> users { get; set; }
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
-
-    private void CreateMyChatUser()
-    {
-        using var db = DbFactory.CreateDbContext();
-
-        db.ChatUsers.Add(new ChatUser()
-        {
-            ChatUserId = Guid.NewGuid(),
-            Username = "brianheredia@gmail.com"
-        });
-
-        db.SaveChanges();
-    }
+    [CascadingParameter]
+    public string? UserId { get; set; }
+    private List<Chat>? _Chats { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        using var db = DbFactory.CreateDbContext();
-
-        users = await db.ChatUsers.ToListAsync();
-
+        _Chats = _chatService.GetUserChats(UserId);
         await base.OnParametersSetAsync();
+    }
+
+    private void GoToChat(Guid chatId)
+    {
+        NavigationManager.NavigateTo($"chat/{chatId}");        
     }
 }

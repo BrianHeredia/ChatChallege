@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatChallenge.Data
 {
-    public partial class ApplicationDbContext : IdentityDbContext
+    public partial class ApplicationDbContext : IdentityDbContext<ChatUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -22,16 +23,6 @@ namespace ChatChallenge.Data
                 entity.ToTable("Chat", "dbo");
 
                 entity.Property(e => e.ChatId).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<ChatUser>(entity =>
-            {
-                entity.ToTable("ChatUser", "dbo");
-
-                entity.Property(e => e.ChatUserId).ValueGeneratedNever();
-
-                entity.Property(e => e.Username)
-                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<ChatMessage>(entity =>
@@ -73,15 +64,13 @@ namespace ChatChallenge.Data
         public virtual ICollection<ChatUser> JoinedChatUsers { get; set; }
     }
 
-    public class ChatUser
+    public class ChatUser: IdentityUser
     {
         public ChatUser()
         {
             ChatMessages = new HashSet<ChatMessage>();
             JoinedChatsRooms = new HashSet<Chat>();
         }
-        public Guid ChatUserId { get; set; }
-        public string Username { get; set; }
         public virtual ICollection<ChatMessage> ChatMessages { get; set; }
         public virtual ICollection<Chat> JoinedChatsRooms { get; set; }
     }
@@ -89,7 +78,7 @@ namespace ChatChallenge.Data
     public class ChatMessage
     {
         public Guid ChatMessageId { get; set; }
-        public Guid ChatUserId { get; set; }
+        public string ChatUserId { get; set; }
         public Guid ChatId { get; set; }
         public DateTime CreatedOn { get; set; }
         public string Message { get; set; }

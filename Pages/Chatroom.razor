@@ -1,0 +1,95 @@
+﻿@page "/chat/{ChatId:guid}"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.SignalR.Client
+@inject IChatService _chatService
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+
+<div class="d-flex w-100 flex-column">
+    @if(_Chat != null)
+    {
+        var members = "Chatroom: ";
+        foreach (var user in _Chat.JoinedChatUsers)
+        {
+            members = members + user.UserName + "; ";
+        }
+        <h3>@members</h3>
+        if(_Chat.ChatMessages != null && _Chat.ChatMessages.Count > 0)
+        {
+            foreach(var message in _Chat.ChatMessages.OrderBy(x=>x.CreatedOn))
+            {
+                <div>                
+                    <p>@message.Message</p>
+                    <p>@message.CreatedOn</p>
+                </div>
+            }
+        }
+    }
+    <textarea class="d-block w-100" value="@Message" @oninput="@((ChangeEventArgs _e) => OnType(_e.Value.ToString()) )"/>
+    <button class="btn btn-outline-primary d-block w-100" disabled="@(!IsConnected)" @onclick="Send">SEND</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    public string? UserId { get; set; }
+    [Parameter]
+    public Guid ChatId { get; set; }
+
+    private Chat _Chat { get; set; }
+
+    private string Message { get; set; }
+
+    private HubConnection? hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<ChatMessage>("ReceiveMessage", (message) =>
+        {
+            _Chat.ChatMessages.Add(message);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
+        Initialize();
+    }
+    
+
+    protected override async Task OnParametersSetAsync()
+    {        
+        await base.OnParametersSetAsync();
+    }
+
+    private void OnType(string text)
+    {
+        Message = text;
+    }
+
+    private void Initialize()
+    {
+        Message = "";
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendMessage", ChatId, UserId, Message);
+            Initialize();
+        }
+    }
+
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
