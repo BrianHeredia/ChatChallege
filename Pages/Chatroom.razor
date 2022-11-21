@@ -18,11 +18,17 @@
         {
             foreach(var message in _Chat.ChatMessages.OrderBy(x=>x.CreatedOn))
             {
-                <div>                
+                var user = _Chat.JoinedChatUsers.FirstOrDefault(x => x.Id == message.ChatUserId);
+                <div>
+                    <p><strong>@(user is not null ? user.Email + ":" : "The Bot:")</strong></p>
                     <p>@message.Message</p>
                     <p>@message.CreatedOn</p>
                 </div>
             }
+        }
+        else
+        {
+            <p>Empty chat, say hello!</p>
         }
     }
     <textarea class="d-block w-100" value="@Message" @oninput="@((ChangeEventArgs _e) => OnType(_e.Value.ToString()) )"/>
@@ -37,7 +43,7 @@
 
     private Chat _Chat { get; set; }
 
-    private string Message { get; set; }
+    private string Message { get; set; } = "";
 
     private HubConnection? hubConnection;
 
@@ -49,13 +55,29 @@
 
         hubConnection.On<ChatMessage>("ReceiveMessage", (message) =>
         {
-            _Chat.ChatMessages.Add(message);
+            _Chat = _chatService.GetChatWithMessages(ChatId);
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<string>("ReceiveBotMessage", (message) =>
+        {
+            _Chat.ChatMessages.Add(new ChatMessage()
+            {
+                Message = message,
+                ChatUserId = "THEBOT",
+                CreatedOn = DateTime.Now
+            });
             InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
+        
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("AddToGroup", ChatId.ToString());
+        }
 
-        Initialize();
+        _Chat = _chatService.GetChatWithMessages(ChatId);
     }
     
 
@@ -69,17 +91,12 @@
         Message = text;
     }
 
-    private void Initialize()
-    {
-        Message = "";
-    }
-
     private async Task Send()
     {
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendMessage", ChatId, UserId, Message);
-            Initialize();
+            Message = "";
         }
     }
 

@@ -1,5 +1,6 @@
 using ChatChallenge.Areas.Identity;
 using ChatChallenge.Data;
+using ChatChallenge.Bot;
 using ChatChallenge.Services;
 using ChatChallenge.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -21,6 +22,14 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ChatUser>>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IBot, Bot>();
+builder.Services.AddHttpClient("StockAPI", client =>
+{
+    client.BaseAddress = new Uri("https://stooq.com/q/l/");
+    client.DefaultRequestHeaders.Add("Accept", "text/csv; charset=utf-8");
+    //client.DefaultRequestHeaders.Add("Content-Type", "text/csv; charset=utf-8");
+
+});
 builder.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(

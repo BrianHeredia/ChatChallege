@@ -1,6 +1,7 @@
 ﻿@page "/users"
 @attribute [Authorize]
 @inject IChatService _chatService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Users</PageTitle>
 
@@ -13,6 +14,10 @@
         <button  class="btn btn-outline-primary" onclick="@(()=>StartNewChat(user.Id))">Start New Chat</button>
         <br/>
     }
+}
+else
+{
+    <p>There are no other users yet, go tell your friends to join.</p>
 }
 
 @code {
@@ -29,7 +34,11 @@
     {
         if(UserId != null)
         {
-            var response = _chatService.StartChat(UserId, userId);            
+            var response = _chatService.StartChat(UserId, userId);
+            if (response.Item2)
+            {                
+                NavigationManager.NavigateTo($"chat/{response.Item1.ChatId}");    
+            }
         }
     }
 }
