@@ -1,6 +1,5 @@
 ﻿using ChatChallenge.Data;
 using ChatChallenge.Repositories;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ChatChallenge.Services
 {
@@ -36,19 +35,6 @@ namespace ChatChallenge.Services
 
         public (Chat?, bool, string?) JoinChat(string userId, Guid chatId)
         {
-            try
-            {
-                var chat = _chatRepository.GetChat(chatId);
-                chat.JoinedChatUsers.Add(_chatRepository.GetUser(userId));
-                _chatRepository.UpdateChat(chat);
-
-                return (chat, true, null);
-            }
-            catch (Exception ex)
-            {
-                return (null, false, ex.Message);
-            }
-
             throw new NotImplementedException();
         }
 

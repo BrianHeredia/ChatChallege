@@ -5,6 +5,8 @@ VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatChallenge", "ChatChallenge.csproj", "{99616DA9-741E-458C-BBE3-7F831BC210F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatChallengeTests", "..\ChatChallengeTests\ChatChallengeTests.csproj", "{A66ABDE4-A20A-48FE-86B8-BE7C3C7E16A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{99616DA9-741E-458C-BBE3-7F831BC210F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99616DA9-741E-458C-BBE3-7F831BC210F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99616DA9-741E-458C-BBE3-7F831BC210F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A66ABDE4-A20A-48FE-86B8-BE7C3C7E16A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A66ABDE4-A20A-48FE-86B8-BE7C3C7E16A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A66ABDE4-A20A-48FE-86B8-BE7C3C7E16A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A66ABDE4-A20A-48FE-86B8-BE7C3C7E16A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
