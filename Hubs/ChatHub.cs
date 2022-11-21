@@ -16,19 +16,23 @@ namespace ChatChallenge.Servers.Hubs
         public async Task SendMessage(Guid chatId, string userId, string message)
         {
             var botResponse = _bot.AnalizeMessage(message);
-            if (botResponse.isValidCommand)
+            string _message = string.Empty;
+            bool isBotMessage = false;
+            if (botResponse.isValidCommand)//Bot Command
             {
                 if(botResponse.command == "stock" && botResponse.data is not null)
                 {
                     var botCommandExecuted = _bot.ExecuteStockCommand(botResponse.data);
-                    await Clients.Group(chatId.ToString()).SendAsync("ReceiveBotMessage", botCommandExecuted.response);
+                    _message = botCommandExecuted.response;
+                    isBotMessage = true;
                 }
             }
-            else
+            else//Regular Message
             {
-                var response = _chatService.SendMessage(userId, chatId, message);
-                await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", response.Item1);
+                _message = message;
             }
+            var response = _chatService.SendMessage(userId, chatId, _message, isBotMessage);
+            await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", response._ChatMessage);
         }
 
         public async Task AddToGroup(string chatId)

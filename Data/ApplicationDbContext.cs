@@ -82,6 +82,7 @@ namespace ChatChallenge.Data
         public Guid ChatId { get; set; }
         public DateTime CreatedOn { get; set; }
         public string Message { get; set; }
+        public bool IsBotMessage { get; set; }
         public ChatUser ChatUser { get; set; }
         public Chat Chat { get; set; }
 

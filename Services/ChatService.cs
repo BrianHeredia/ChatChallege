@@ -17,9 +17,16 @@ namespace ChatChallenge.Services
             return _chatRepository.GetAllUsers();
         }
 
-        public Chat GetChatWithMessages(Guid id)
+        public (Chat?, bool, string?) GetChatWithMessages(Guid id)
         {
-            return _chatRepository.GetChat(id);
+            try
+            {
+                return (_chatRepository.GetChat(id), true, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, false, ex.Message);
+            }
         }
 
         public List<Chat> GetUserChats(string userId)
@@ -45,7 +52,7 @@ namespace ChatChallenge.Services
             throw new NotImplementedException();
         }
 
-        public (ChatMessage?, bool, string?) SendMessage(string userId, Guid chatId, string message)
+        public (ChatMessage?, bool, string?) SendMessage(string userId, Guid chatId, string message, bool isBotMessage)
         {
             try
             {
@@ -55,7 +62,8 @@ namespace ChatChallenge.Services
                     ChatUserId = userId,
                     Message = message,
                     CreatedOn = DateTime.Now,
-                    ChatMessageId = Guid.NewGuid()                    
+                    ChatMessageId = Guid.NewGuid(),
+                    IsBotMessage = isBotMessage
                 };
 
                 _chatRepository.CreateMessage(Message);

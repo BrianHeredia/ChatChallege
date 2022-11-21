@@ -42,11 +42,11 @@ namespace ChatChallenge.Repositories
             }
         }
 
-        public Chat GetChat(Guid id)
+        public  Chat GetChat(Guid id)
         {
             using (var context = new ApplicationDbContext(options))
             {
-                return context.Chats.Include(x => x.ChatMessages).Include(x => x.JoinedChatUsers).First(x => x.ChatId == id);
+                return context.Chats.Include(x => x.ChatMessages.OrderBy(y=>y.CreatedOn).Take(50)).Include(x => x.JoinedChatUsers).First(x => x.ChatId == id);
             }
         }
 
