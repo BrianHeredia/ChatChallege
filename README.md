@@ -40,7 +40,8 @@ messages.
 
 ● Build an installer.
 
-Considerations
+# Considerations
+
 ● We will open 2 browser windows and log in with 2 different users to test the
 functionalities.
 
